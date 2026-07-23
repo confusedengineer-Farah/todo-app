@@ -28,26 +28,56 @@ function editTodo(id){
     renderTodos();
 }
 
+function completeTodo(id){
+    for(let i=0;i<allTodos.length;i++){
+        if(allTodos[i].id === id){
+            allTodos[i].completed = !allTodos[i].completed;
+            break;
+        }
+    }
+    renderTodos();
+}
+
 function renderTodos(){
     const todos = document.getElementById("todos")
 
     todos.innerHTML = "";
 
     for(let i =0;i<allTodos.length;i++){
-        const card = document.createElement('div');
-        const text = document.createElement('p')
-        const editButton = document.createElement('button')
-        const deleteButton = document.createElement('button')
 
+        const card = document.createElement('div')
+
+        const checkbox = document.createElement('input')
+        checkbox.type = "checkbox"
+        checkbox.checked = allTodos[i].completed;
+
+        const text = document.createElement('p')
         text.innerHTML = allTodos[i].text;
-        editButton.innerHTML = "Edit";
-        deleteButton.innerHTML = "Delete";
+
+        if(allTodos[i].completed){
+            text.style.textDecoration = 'line-through';
+            text.style.color = "gray";
+        }
+
+        const editButton = document.createElement('button')
+        editButton.textContent = "Edit";
+
+        const deleteButton = document.createElement('button')
+        deleteButton.textContent = "Delete";
+
+        checkbox.addEventListener("click", () => {
+            completeTodo(allTodos[i].id)
+        })
+        
+        
         deleteButton.addEventListener("click",() =>{
             deleteTodo(allTodos[i].id)
         })
         editButton.addEventListener("click", () => {
             editTodo(allTodos[i].id)
         })
+
+        card.appendChild(checkbox)
         card.appendChild(text)
         card.appendChild(editButton)
         card.appendChild(deleteButton);
