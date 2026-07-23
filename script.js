@@ -1,137 +1,123 @@
+const STORAGE_KEY = "todos";
 const allTodos = [];
 
-const searchInput = document.getAnimations("searchTodo")
+const newTodoInput = document.getElementById("newTodo");
+const searchInput = document.getElementById("searchTodo");
+const todosContainer = document.getElementById("todos");
+const addTodoButton = document.getElementById("addTodoButton");
 
-searchInput.addEventListener("input", () => {
-    renderTodos();
-})
+function saveTodos() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(allTodos));
+}
 
-function deleteTodo(id){
-    
-    for(let i =0;i<allTodos.length;i++){
-        if(allTodos[i].id == id){
-            allTodos.splice(i,1);
-            saveTodo();
-            break;
-        }
-
-    }
+function loadTodos() {
+    const savedTodos = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    allTodos.push(...savedTodos);
     renderTodos();
 }
 
-function editTodo(id){
-    for(let i = 0; i< allTodos.length;i++){
-        if(allTodos[i].id == id){
-            const newText = prompt(
-                "Enter your new Todo",
-                allTodos[i].text
-            );
-            if(newText === null) return;
-            if(newText.trim() === "") return;
-            allTodos[i].text = newText.trim();
-            saveTodo()
-            break;
-        }
+function deleteTodo(id) {
+    const todoIndex = allTodos.findIndex((todo) => todo.id === id);
+
+    if (todoIndex !== -1) {
+        allTodos.splice(todoIndex, 1);
+        saveTodos();
     }
+
     renderTodos();
 }
 
-function completeTodo(id){
-    for(let i=0;i<allTodos.length;i++){
-        if(allTodos[i].id === id){
-            allTodos[i].completed = !allTodos[i].completed;
-            saveTodo();
-            break;
-        }
-    }
+function editTodo(id) {
+    const todo = allTodos.find((item) => item.id === id);
+
+    if (!todo) return;
+
+    const newText = prompt("Enter your new Todo", todo.text);
+
+    if (newText === null) return;
+
+    const trimmedText = newText.trim();
+    if (trimmedText === "") return;
+
+    todo.text = trimmedText;
+    saveTodos();
     renderTodos();
 }
 
-function saveTodo(){
-    localStorage.setItem("todos",JSON.stringify(allTodos));
-}
+function completeTodo(id) {
+    const todo = allTodos.find((item) => item.id === id);
 
-function loadTodos(){
-    const savedTodos = localStorage.getItem("todos");
+    if (!todo) return;
 
-    if(savedTodos != null){
-        allTodos.push(...JSON.parse(savedTodos));
-    }
+    todo.completed = !todo.completed;
+    saveTodos();
     renderTodos();
 }
 
-function renderTodos(){
+function createTodoCard(todo) {
+    const card = document.createElement("div");
 
-    const todos = document.getElementById("todos")
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = todo.completed;
 
-    todos.innerHTML = "";
+    const text = document.createElement("p");
+    text.textContent = todo.text;
 
-    const search = document
-        .getElementById("searchTodo")
-        .value
-        .toLowerCase();
-
-
-    for(let i =0;i<allTodos.length;i++){
-
-        if(!allTodos[i].text.toLowerCase().includes(search)) continue;
-
-        const card = document.createElement('div')
-
-        const checkbox = document.createElement('input')
-        checkbox.type = "checkbox"
-        checkbox.checked = allTodos[i].completed;
-
-        const text = document.createElement('p')
-        text.innerHTML = allTodos[i].text;
-
-        if(allTodos[i].completed){
-            text.style.textDecoration = 'line-through';
-            text.style.color = "gray";
-        }
-
-        const editButton = document.createElement('button')
-        editButton.textContent = "Edit";
-
-        const deleteButton = document.createElement('button')
-        deleteButton.textContent = "Delete";
-
-        checkbox.addEventListener("click", () => {
-            completeTodo(allTodos[i].id)
-        })
-        
-        
-        deleteButton.addEventListener("click",() =>{
-            deleteTodo(allTodos[i].id)
-        })
-        editButton.addEventListener("click", () => {
-            editTodo(allTodos[i].id)
-        })
-
-        card.appendChild(checkbox)
-        card.appendChild(text)
-        card.appendChild(editButton)
-        card.appendChild(deleteButton);
-        todos.appendChild(card);
+    if (todo.completed) {
+        text.style.textDecoration = "line-through";
+        text.style.color = "gray";
     }
+
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+
+    checkbox.addEventListener("change", () => completeTodo(todo.id));
+    editButton.addEventListener("click", () => editTodo(todo.id));
+    deleteButton.addEventListener("click", () => deleteTodo(todo.id));
+
+    card.append(checkbox, text, editButton, deleteButton);
+    return card;
 }
 
-function addTodo(){
-    const newTodo = document.getElementById("newTodo");
-    const value = newTodo.value.trim();
-    if(newTodo.value === "") return;
-    const todo = {
+function renderTodos() {
+    todosContainer.innerHTML = "";
+
+    const searchTerm = searchInput.value.trim().toLowerCase();
+
+    allTodos.forEach((todo) => {
+        if (!todo.text.toLowerCase().includes(searchTerm)) return;
+
+        const card = createTodoCard(todo);
+        todosContainer.appendChild(card);
+    });
+}
+
+function addTodo() {
+    const value = newTodoInput.value.trim();
+
+    if (value === "") return;
+
+    allTodos.push({
         id: Date.now(),
         text: value,
-        completed: false
+        completed: false,
+    });
 
-    };
-    allTodos.push(todo);
-    saveTodo();
+    saveTodos();
     renderTodos();
-    newTodo.value = "";
+    newTodoInput.value = "";
 }
 
-window.onload = function () {
-    loadTodos();
-}
+addTodoButton.addEventListener("click", addTodo);
+newTodoInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        addTodo();
+    }
+});
+searchInput.addEventListener("input", renderTodos);
+
+loadTodos();
