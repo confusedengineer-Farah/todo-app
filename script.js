@@ -7,7 +7,23 @@ function deleteTodo(id){
             allTodos.splice(i,1);
             break;
         }
-        
+
+    }
+    renderTodos();
+}
+
+function editTodo(id){
+    for(let i = 0; i< allTodos.length;i++){
+        if(allTodos[i].id == id){
+            const newText = prompt(
+                "Enter your new Todo",
+                allTodos[i].text
+            );
+            if(newText === null) return;
+            if(newText.trim() === "") return;
+            allTodos[i].text = newText.trim();
+            break;
+        }
     }
     renderTodos();
 }
@@ -28,6 +44,9 @@ function renderTodos(){
         deleteButton.innerHTML = "Delete";
         deleteButton.addEventListener("click",() =>{
             deleteTodo(allTodos[i].id)
+        })
+        editButton.addEventListener("click", () => {
+            editTodo(allTodos[i].id)
         })
         card.appendChild(text)
         card.appendChild(editButton)
