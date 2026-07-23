@@ -5,6 +5,7 @@ function deleteTodo(id){
     for(let i =0;i<allTodos.length;i++){
         if(allTodos[i].id == id){
             allTodos.splice(i,1);
+            saveTodo();
             break;
         }
 
@@ -22,6 +23,7 @@ function editTodo(id){
             if(newText === null) return;
             if(newText.trim() === "") return;
             allTodos[i].text = newText.trim();
+            saveTodo()
             break;
         }
     }
@@ -32,8 +34,22 @@ function completeTodo(id){
     for(let i=0;i<allTodos.length;i++){
         if(allTodos[i].id === id){
             allTodos[i].completed = !allTodos[i].completed;
+            saveTodo();
             break;
         }
+    }
+    renderTodos();
+}
+
+function saveTodo(){
+    localStorage.setItem("todos",JSON.stringify(allTodos));
+}
+
+function loadTodos(){
+    const savedTodos = localStorage.getItem("todos");
+
+    if(savedTodos != null){
+        allTodos.push(...JSON.parse(savedTodos));
     }
     renderTodos();
 }
@@ -96,6 +112,11 @@ function addTodo(){
 
     };
     allTodos.push(todo);
+    saveTodo();
     renderTodos();
     newTodo.value = "";
+}
+
+window.onload = function () {
+    loadTodos();
 }
