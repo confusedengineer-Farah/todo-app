@@ -1,5 +1,11 @@
 const allTodos = [];
 
+const searchInput = document.getAnimations("searchTodo")
+
+searchInput.addEventListener("input", () => {
+    renderTodos();
+})
+
 function deleteTodo(id){
     
     for(let i =0;i<allTodos.length;i++){
@@ -55,11 +61,20 @@ function loadTodos(){
 }
 
 function renderTodos(){
+
     const todos = document.getElementById("todos")
 
     todos.innerHTML = "";
 
+    const search = document
+        .getElementById("searchTodo")
+        .value
+        .toLowerCase();
+
+
     for(let i =0;i<allTodos.length;i++){
+
+        if(!allTodos[i].text.toLowerCase().includes(search)) continue;
 
         const card = document.createElement('div')
 
