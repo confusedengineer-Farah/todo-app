@@ -7,6 +7,7 @@ function deleteTodo(id){
             allTodos.splice(i,1);
             break;
         }
+        
     }
     renderTodos();
 }
